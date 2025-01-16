@@ -102,8 +102,8 @@ conn.execute(u"""SELECT * FROM foobar WHERE %s and foo = '\t'""")
 #                                                          ^ constant.character.escape.python
 
 regex = r'\b ([fobar]*){1}(?:a|b)?'
-#         ^ meta.string.python keyword.control.anchor.regexp
-#                       ^ keyword.operator.quantifier.regexp
+#         ^^ meta.string.python keyword.control.anchor.regexp
+#                      ^^^ keyword.operator.quantifier.regexp
 
 regex = r'.* # Not a comment (yet)'
 #            ^^^^^^^^^^^^^^^^^^^^^ - comment
@@ -114,6 +114,43 @@ regex = r".* # Not a comment (yet)"
 #            ^^^^^^^^^^^^^^^^^^^^^ - comment
 #                                 ^ punctuation.definition.string.end.python - comment
 #                                  ^ - invalid
+
+regex = r"(backref) \1 "
+#                   ^^ keyword.other.backref-and-recursion.regexp
+#                    ^ variable.other.backref-and-recursion.regexp
+#                     ^ - keyword
+
+regex = r'(?P<quote>[\'"]).*?(?P=quote)'
+#          ^^ keyword.other.backref-and-recursion.regexp
+#            ^ punctuation.definition.capture-group-name.begin.regexp
+#             ^^^^^ entity.name.capture-group.regexp - invalid
+#                  ^ punctuation.definition.capture-group-name.end.regexp
+#                             ^^^ keyword.other.back-reference.named.regexp
+#                                ^^^^^ variable.other.backref-and-recursion.regexp - invalid
+
+regex = r'(?P<Quote>[\'"]).*?(?P=Quote)'
+#          ^^ keyword.other.backref-and-recursion.regexp
+#            ^ punctuation.definition.capture-group-name.begin.regexp
+#             ^^^^^ entity.name.capture-group.regexp - invalid
+#                  ^ punctuation.definition.capture-group-name.end.regexp
+#                             ^^^ keyword.other.back-reference.named.regexp
+#                                ^^^^^ variable.other.backref-and-recursion.regexp - invalid
+
+regex = r'(?P<quote>[\'"]).*?\g<quote>'
+#          ^^ keyword.other.backref-and-recursion.regexp
+#            ^ punctuation.definition.capture-group-name.begin.regexp
+#             ^^^^^ entity.name.capture-group.regexp - invalid
+#                  ^ punctuation.definition.capture-group-name.end.regexp
+#                            ^^ keyword.other.backref-and-recursion.regexp
+#                               ^^^^^ variable.other.backref-and-recursion.regexp - invalid
+
+regex = r'(?P<Quote>[\'"]).*?\g<Quote>'
+#          ^^ keyword.other.backref-and-recursion.regexp
+#            ^ punctuation.definition.capture-group-name.begin.regexp
+#             ^^^^^ entity.name.capture-group.regexp - invalid
+#                  ^ punctuation.definition.capture-group-name.end.regexp
+#                            ^^ keyword.other.backref-and-recursion.regexp
+#                               ^^^^^ variable.other.backref-and-recursion.regexp - invalid
 
 regex = r'''\b ([fobar]*){1}(?:a|b)?'''
 #           ^ keyword.control.anchor.regexp
@@ -164,7 +201,7 @@ string = r"""
     # An indented comment.
 #  ^ - comment
 #   ^ comment.line.number-sign.regexp
-### <<This comment>> @includes some &punctutation.
+### <<This comment>> @includes some &punctuation.
 # <- comment.line.number-sign.regexp
 """
 
@@ -180,7 +217,7 @@ string = r'''
     # An indented comment.
 #  ^ - comment
 #   ^ comment.line.number-sign.regexp
-### <<This comment>> @includes some &punctutation.
+### <<This comment>> @includes some &punctuation.
 # <- comment.line.number-sign.regexp
 '''
 
@@ -656,7 +693,7 @@ raw = RF"""foo\"""" + RF"""foo\'""" + RF"""foo\\"""
 #                                              ^^ storage.type.string
 #                                                    ^^ storage.type.string
 
-# Bytes by defaut support placeholders and character escapes, but not unicode
+# Bytes by default support placeholders and character escapes, but not unicode
 b'This is a \n test, %s no unicode \uDEAD'
 # <- storage.type.string
 #^ string.quoted.single punctuation.definition.string.begin
@@ -1074,13 +1111,13 @@ bar = "}}" # Comment
 # ^ - constant.other.placeholder
 
 # Incomplete field elements
-"{foo["      # unclosed elemnt index
+"{foo["      # unclosed element index
 #^^^^^ - constant.other.placeholder
-'{foo['      # unclosed elemnt index
+'{foo['      # unclosed element index
 #^^^^^ - constant.other.placeholder
-"{foo[}"     # unclosed elemnt index
+"{foo[}"     # unclosed element index
 #^^^^^^ - constant.other.placeholder
-'{foo[}'     # unclosed elemnt index
+'{foo[}'     # unclosed element index
 #^^^^^^ - constant.other.placeholder
 "{foo[""]}"  # unsupported nested quotes
 #^^^^^^^^^ - constant.other.placeholder
@@ -1263,6 +1300,11 @@ match = re.search(r'''(?ix:some text(?-i:hello))(?iLmsux)(?a)foo''', line)
 #                                                        ^^^^ meta.modifier
 #                                                          ^ storage.modifier.mode
 
+match = re.match(r"([^" + charset + r"]*)", line)
+#                  ^ punctuation.section.group.begin.regexp
+#                   ^ punctuation.definition.set.begin.regexp
+#                                     ^ punctuation.definition.set.end.regexp
+#                                       ^ punctuation.section.group.end.regexp
 
 ###############################
 # f-strings
